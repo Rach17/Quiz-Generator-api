@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
-from routes import pdf
+from routes import pdf, quiz, test
 from config import settings
 
 @asynccontextmanager
@@ -28,6 +28,6 @@ app.add_middleware(
 )
 
 # Include routers
-# app.include_router(quiz.router, prefix="/api/v1", tags=["quiz"])
+app.include_router(quiz.router, prefix="/api/v1", tags=["quiz"])
 app.include_router(pdf.router, prefix="/api/v1", tags=["pdf"])
-
+app.include_router(test.router, prefix="/api/v1", tags=["test"])

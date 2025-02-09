@@ -1,23 +1,31 @@
 from pydantic import BaseModel, Field
 from typing import List
+from pydantic import BaseModel, Field, field_validator, ValidationInfo
+from typing import Literal
 
 class QuestionSchema(BaseModel):
-    question: str = Field(..., min_length=10)
-    options: List[str] = Field(..., min_items=4, max_items=4)
-    correct_answer: str = Field(..., pattern="^option[1-4]$")
+    question: str = Field(..., description="The multiple-choice question")
+    option_a: str = Field(..., description="Option A for the question")
+    option_b: str = Field(..., description="Option B for the question")
+    option_c: str = Field(..., description="Option C for the question")
+    option_d: str = Field(..., description="Option D for the question")
+    correct_answer: Literal['A', 'B', 'C', 'D'] = Field(
+        ..., 
+        description="The correct answer (must match an existing option)"
+    )
 
-    class Config:
-        json_schema_extra = {
-            "example": {
-                "question": "What is the capital of France?",
-                "options": ["London", "Berlin", "Paris", "Madrid"],
-                "correct_answer": "option3"
-            }
-        }
+    @field_validator('correct_answer')
+    def validate_correct_answer(cls, v: str, info: ValidationInfo) -> str:
+        # Access the model's data using info.data
+        option_field = f'option_{v.lower()}'
+        if not info.data.get(option_field):
+            raise ValueError(f'Correct answer {v} specified but corresponding option is missing')
+        return v
+
 
 class QuizSchema(BaseModel):
-    topic: str
-    difficulty: str = Field("medium", pattern="^(easy|medium|hard)$")
+    name : str = Field("Quizz", description="The name of the quiz")
+    difficulty: str = Field("Easy", pattern="^(easy|medium|hard)$")
     questions: List[QuestionSchema]
 
 class UploadResponse(BaseModel):
