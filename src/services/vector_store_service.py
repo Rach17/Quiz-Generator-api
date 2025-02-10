@@ -1,5 +1,4 @@
 from langchain_core.documents import Document
-from langchain_chroma import Chroma
 from utils.vector_store_utilis import init_vector_store
 import random
 

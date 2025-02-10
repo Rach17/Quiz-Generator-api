@@ -46,7 +46,7 @@ async def process_pdf(file, collection_name = "documents") -> Dict:
     try:
         document = await load_pdf(file)
         docs = split_pdf(document)
-        vector_store = init_vector_store(embeddings=init_embiddings_model()) 
+        vector_store = init_vector_store(collection_name=collection_name,embeddings=init_embiddings_model()) 
         print("Adding documents to vector store...")
         await add_documents_to_vector_store(vector_store, docs)
         return {
@@ -55,3 +55,4 @@ async def process_pdf(file, collection_name = "documents") -> Dict:
     except Exception as e:
         print(f"Error processing PDF: {e}")
         raise e
+    
