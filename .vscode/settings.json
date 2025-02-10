@@ -1,0 +1,7 @@
+{
+    "json.schemas": [],
+    "files.exclude": {
+        "**/__pycache__": true,
+        "**/*.pyc": true
+    }
+}

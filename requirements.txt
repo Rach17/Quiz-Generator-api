@@ -31,4 +31,9 @@ httpx>=0.26.0
 # Optional but recommended
 python-multipart>=0.0.6  # For file uploads
 typing-extensions>=4.9.0  # Type hints support
-pathlib>=3.4 # For file paths
+
+# In memory caching 
+redis>=5.2.1
+
+# Serialization and deserialization
+pickle5>=0.0.12

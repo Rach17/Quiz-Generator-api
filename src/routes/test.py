@@ -20,3 +20,4 @@ async def test_llm():
     if result["status"] == "error":
         raise HTTPException(status_code=500, detail=result["message"])
     return result
+

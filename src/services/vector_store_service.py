@@ -1,20 +1,27 @@
 from langchain_core.documents import Document
-from utils.vector_store_utilis import init_vector_store
+from utils.embeddings_utils import init_embiddings_model
 import random
+from langchain_chroma import Chroma
+from typing import List
+from langchain_core.documents import Document
+from services.caching_service import CollectionCache 
 
+cache = CollectionCache()
     
-async def get_random_doc(collection_name: str = "documents") -> Document:
-    vector_store = init_vector_store(collection_name)
-    all_ids = vector_store.get()["ids"]
+async def init_collection(collection_name: str, documents: List[Document]):
+    print("Initializing collection...")
+    collection = await Chroma.afrom_documents(documents=documents, embedding=init_embiddings_model())  
+    print("Caching collection...")
+    cache.add_collection(collection_name, collection)
+    
+    
+async def get_random_doc(collection_name: str) -> Document:
+    cache.show_cache()
+    collection = cache.get_collection(collection_name)
+    all_ids = collection.get()["ids"]
     random_id = random.choice(all_ids)
     print(f"Get random document ID: {random_id}")
-    random_document = vector_store.get_by_ids([random_id])
+    random_document = collection.get_by_ids([random_id])
     return random_document[0]
     
     
-async def clear_vector_store(collection_name: str = "documents"):
-    vector_store = init_vector_store(collection_name)
-    vector_store.delete_collection()
-    content = await get_random_doc()
-    print(f"Clearing vector store with content: {content}")
-    print("Vector store cleared")

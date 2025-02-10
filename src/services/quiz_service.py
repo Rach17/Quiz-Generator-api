@@ -1,4 +1,4 @@
-from models.schemas import  QuestionSchema
+from models.schemas import  QuestionSchema, QuizSchema
 from config import settings
 from langchain_core.prompts import PromptTemplate
 import json
@@ -24,13 +24,13 @@ QUIZ_PROMPT_TEMPLATE = PromptTemplate(
     ) 
 
 
-async def create_question(difficulty: str = "hard") -> QuestionSchema:
+async def create_question(collection_name : str, difficulty: str) -> QuestionSchema:
     try:
         print("Generating question...")
         print("Initiating LLM model...")
         llm_model = init_llm_model()
         print("Getting random document...")
-        doc_context = await get_random_doc()
+        doc_context = await get_random_doc(collection_name)
         context = doc_context.page_content
         print("Initiating chain...")
         model = llm_model.with_structured_output(QuestionSchema)
@@ -47,3 +47,18 @@ async def create_question(difficulty: str = "hard") -> QuestionSchema:
         logger.error("Quiz generation failed: %s", str(e))
         raise
     
+    
+async def create_quiz(collection_name: str, difficulty: str, questions_number: int) -> QuizSchema:
+    questions = []
+    for i in range(questions_number):
+        try:
+            print(f"Generating question {i+1}...")
+            question = await create_question(collection_name, difficulty)
+            print(f"Question {i+1} generated successfully")
+            questions.append(question)
+        except Exception as e:
+            logger.error("Quiz generation failed: %s", str(e))
+            raise
+        
+    quizz = QuizSchema(name=collection_name, difficulty=difficulty, questions=questions)
+    return quizz

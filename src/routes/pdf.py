@@ -30,8 +30,7 @@ async def upload_pdf(file: UploadFile = File(..., description="PDF file for proc
             
         result = await process_pdf(file)
         return {
-            "filename": file.filename,
-            "content_length": file.size,
+            "collection_name": result["collection_name"],
             "chunks_number": result["chunks_number"],
             }
         
@@ -42,6 +41,24 @@ async def upload_pdf(file: UploadFile = File(..., description="PDF file for proc
         return JSONResponse(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             content={"message": "PDF processing failed"}
+        )
+        
+        
+@router.get(
+    "/collection/{collection_name}",
+    summary="Get collection details",
+    description="Get details of a processed PDF collection"
+)
+async def get_collection(collection_name: str):
+    try:
+            
+        return {"message": "Collection found"}
+    
+    except Exception as e:
+        logger.error(f"Error fetching collection details: {str(e)}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to fetch collection details"
         )
         
         

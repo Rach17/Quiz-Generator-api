@@ -29,8 +29,7 @@ class QuizSchema(BaseModel):
     questions: List[QuestionSchema]
 
 class UploadResponse(BaseModel):
-    filename: str
-    content_length: int
+    collection_name: str
     chunks_number: int
     
 class ProcessedPDF(BaseModel):
