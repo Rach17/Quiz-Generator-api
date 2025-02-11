@@ -1,5 +1,6 @@
 from fastapi import APIRouter, HTTPException, Query
-from services.quiz_service import  create_quiz
+from sse_starlette.sse import EventSourceResponse
+from services.quiz_service import  create_quiz, event_quiz_generation
 from models.schemas import QuizSchema
 from config import settings
 import logging
@@ -40,3 +41,27 @@ async def generate_quiz(
             status_code=500,
             detail="Failed to generate quiz. Please try again."
         )
+        
+@router.get(
+    "/generate-quiz-sse/{collection_name}",
+    summary="Generate quiz from content using SSE",
+        responses={
+        200: {"description": "Successfully generated quiz events"},
+        400: {"description": "Invalid request parameters"},
+        500: {"description": "Quiz generation failed"}
+    }
+)
+async def stream_quiz(
+    collection_name: str)-> EventSourceResponse:
+    try:
+        print("stream_quiz")
+        return EventSourceResponse(event_quiz_generation(collection_name))
+    
+    except HTTPException as he:
+        raise he
+    except Exception as e:
+        logger.error("Quiz generation failed: %s", str(e))
+        raise HTTPException(
+            status_code=500,
+            detail="Failed to generate quiz. Please try again."
+        )     

@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Quiz Generator Client</title>
+  </head>
+  <body>
+    <h1>Upload File to Generate Quiz</h1>
+    <!-- File upload form -->
+    <form id="upload-form">
+      <input type="file" id="file-input" name="file" required />
+      <button type="submit">Upload</button>
+    </form>
+
+    <!-- Display the returned collection name -->
+    <div id="collection-name"></div>
+
+    <!-- Display quiz questions as they arrive -->
+    <div id="quiz">
+      <h2>Quiz Questions</h2>
+      <ul id="questions"></ul>
+    </div>
+
+    <script>
+      const uploadForm = document.getElementById("upload-form");
+      const fileInput = document.getElementById("file-input");
+      const collectionNameDiv = document.getElementById("collection-name");
+      const questionsUl = document.getElementById("questions");
+
+      uploadForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const file = fileInput.files[0];
+        if (!file) {
+          alert("Please select a file to upload.");
+          return;
+        }
+
+        // Create FormData to send the file
+        const formData = new FormData();
+        formData.append("file", file);
+
+        try {
+          // POST the file to your upload endpoint.
+          // Make sure this endpoint is implemented on the server.
+          const response = await fetch("http://127.0.0.1:8000/api/v1/upload", {
+            method: "POST",
+            body: formData,
+          });
+
+          if (!response.ok) {
+            throw new Error("File upload failed");
+          }
+
+          // Expect a JSON response with the collection name.
+          const result = await response.json();
+          const collectionName = result.collection_name;
+          collectionNameDiv.textContent = "Collection Name: " + collectionName;
+
+          // Now open an SSE connection to generate the quiz using the collection name.
+          // Adjust the URL as needed to match your FastAPI endpoint.
+          const sseUrl = `http://127.0.0.1:8000/api/v1/generate-quiz-sse/${collectionName}`;
+          const eventSource = new EventSource(sseUrl);
+
+          // Listen for each new question event.
+          // Listen for each new question event.
+          eventSource.addEventListener("new_question", (event) => {
+            const question = JSON.parse(event.data);
+            console.log("New question received:", question);
+
+            // Create a list item to display the question.
+            const li = document.createElement("li");
+            const p = document.createElement("p");
+            p.textContent = question.question;
+            li.appendChild(p);
+
+            const ul = document.createElement("ul");
+
+            const optionA = document.createElement("li");
+            optionA.textContent = "A: " + question.option_a;
+            ul.appendChild(optionA);
+            const optionB = document.createElement("li");
+            optionB.textContent = "B: " + question.option_b;
+            ul.appendChild(optionB);
+            const optionC = document.createElement("li");
+            optionC.textContent = "C: " + question.option_c;
+            ul.appendChild(optionC);
+            const optionD = document.createElement("li");
+            optionD.textContent = "D: " + question.option_d;
+            ul.appendChild(optionD);
+            
+            li.appendChild(ul);
+
+            correctAnswer = document.createElement("p");
+            correctAnswer.textContent = "Correct Answer: " + question.correct_answer;
+            
+            questionsUl.appendChild(li);
+          });
+
+          // Listen for a completion event.
+          eventSource.addEventListener("done", (event) => {
+            console.log("Quiz generation completed:", event.data);
+            eventSource.close(); // Close the connection when finished.
+          });
+
+          // Handle error events.
+          eventSource.addEventListener("error", (event) => {
+            console.error("Error event:", event);
+          });
+        } catch (error) {
+          console.error("Error:", error);
+          alert("An error occurred: " + error.message);
+        }
+      });
+    </script>
+  </body>
+</html>

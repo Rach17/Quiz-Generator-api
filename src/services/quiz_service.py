@@ -45,7 +45,7 @@ async def create_question(collection_name : str, difficulty: str) -> QuestionSch
         raise
     
     
-async def create_quiz(collection_name: str, difficulty: str, questions_number: int) -> QuizSchema:
+async def create_quiz(collection_name: str, difficulty: str , questions_number: int ) -> QuizSchema:
     questions = []
     for i in range(questions_number):
         try:
@@ -58,3 +58,16 @@ async def create_quiz(collection_name: str, difficulty: str, questions_number: i
     logging.info("Quiz generated successfully")
     quizz = QuizSchema(name=collection_name, difficulty=difficulty, questions=questions)
     return quizz
+
+async def event_quiz_generation(collection_name: str, difficulty: str = "medium", questions_number: int = 5):
+    for i in range(questions_number):
+            try:
+                # Generate one question at a time.
+                question = await create_question(collection_name, difficulty)
+                # Convert the question (which is a Pydantic model) to JSON.
+                yield {"event": "new_question", "data": question.json()}
+            except Exception as e:
+                # If one question generation fails, send an error event.
+                yield {"event": "error", "data": json.dumps({"error": str(e)})}
+        # Signal that the quiz generation is complete.
+    yield {"event": "done", "data": "Quiz generation completed"}
