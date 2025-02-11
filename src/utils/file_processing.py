@@ -1,5 +1,8 @@
 import os
 import shutil
+import logging
+
+logger = logging.getLogger(__name__)
 
 def clean_temp_files(file_path: str):
     try:
@@ -9,7 +12,8 @@ def clean_temp_files(file_path: str):
             else:
                 shutil.rmtree(file_path)
     except Exception as e:
-        print(f"Error cleaning temp files: {str(e)}")
+        logger.error(f"An error occurred while cleaning temporary files: {str(e)}")
+        raise e
 
 def validate_pdf(file):
     # Check file signature for PDF validation

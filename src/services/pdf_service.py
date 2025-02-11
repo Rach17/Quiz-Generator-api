@@ -6,14 +6,16 @@ from typing import  Dict
 from typing import List
 from langchain_core.documents import Document
 from datetime import datetime
-from services.vector_store_service import init_collection
+from services.collection_service import init_collection
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 async def load_pdf(file) -> List[Document]:
     temp_file = None
     try:
-        # Create temporary file
-        print("Create temporary file for PDF loading...")
+        logger.info("Create temporary file for PDF loading...")
         with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as temp:
             content = await file.read()
             temp.write(content)
@@ -21,11 +23,11 @@ async def load_pdf(file) -> List[Document]:
 
         # PDF Loading
         loader = PyPDFLoader(temp_file)
-        print("Loading PDF document...")
+        logging.info("Loading PDF document...")
         document = loader.load()
         return document
     except Exception as e:
-        print(f"An error occurred while loading the PDF: {e}")
+        logger.error(f"An error occurred while loading the PDF: {str(e)}")
         raise e
     finally:
         if temp_file:
@@ -36,7 +38,6 @@ def split_pdf(document: List[Document], chunk_size: int = 500, chunk_overlap: in
         chunk_size=chunk_size,
         chunk_overlap=chunk_overlap,
     )
-    print("Splitting documents...")
     docs = text_splitter.split_documents(document)
     return docs
 
@@ -53,7 +54,6 @@ async def process_pdf(file) -> Dict:
             "chunks_number": len(docs),
         }
     except Exception as e:
-        print(f"Error processing PDF: {e}")
         raise e
     
     

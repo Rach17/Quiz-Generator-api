@@ -30,7 +30,7 @@ class CollectionCache:
         item = self.cache.get(collection_name)
         if item is None:
             return None
-        return item["collection"]
+        return item
 
     def delete_collection(self, collection_name: str):
         self.cache.pop(collection_name, None)

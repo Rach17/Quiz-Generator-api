@@ -28,10 +28,11 @@ class QuizSchema(BaseModel):
     difficulty: str = Field("Easy", pattern="^(easy|medium|hard)$")
     questions: List[QuestionSchema]
 
-class UploadResponse(BaseModel):
+class UploadPDFResponse(BaseModel):
     collection_name: str
     chunks_number: int
-    
-class ProcessedPDF(BaseModel):
-    chunks: List[str]
-    processed_content: str
+
+class CheckCollectionResponse(BaseModel):
+    collection_name: str
+    chunks_number: int
+    lifetime: str
