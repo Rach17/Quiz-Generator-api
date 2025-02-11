@@ -10,8 +10,9 @@ class Settings(BaseSettings):
     COHERE_API_KEY: str
     CHAT_MODEL: str = "command-r-plus"
     EMBEDDING_MODEL: str = "sentence-transformers/paraphrase-multilingual-mpnet-base-v2"
-    UPLOAD_DIR: str = "./uploads"
     MAX_FILE_SIZE: int = 10_000_000  # 10MB
+    MAX_QUIZ_QUESTIONS: int = 30
+    COLLECTION_LIFETIME: float = 60 * 60 * 24 # 24 hours :
     CORS_ORIGINS: List[str] = ["http://localhost:3000"]
     
     class Config:

@@ -4,6 +4,7 @@ from services.pdf_service import process_pdf
 from models.schemas import UploadResponse
 import logging
 from config import settings
+from services.caching_service import CollectionCache
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
@@ -50,9 +51,19 @@ async def upload_pdf(file: UploadFile = File(..., description="PDF file for proc
     description="Get details of a processed PDF collection"
 )
 async def get_collection(collection_name: str):
+    cache = CollectionCache()
     try:
-            
-        return {"message": "Collection found"}
+        collection = cache.get_collection(collection_name)
+        if collection is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Collection not found"
+            )
+        return {
+            "collection_name": collection_name,
+            "chunks_number": len(collection.get()["ids"]),
+            "lifetime": collection.get("expire_time")
+        }
     
     except Exception as e:
         logger.error(f"Error fetching collection details: {str(e)}")
