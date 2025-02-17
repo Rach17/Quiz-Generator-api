@@ -5,28 +5,16 @@ import json
 import logging
 from utils.llm_utils import init_llm_model
 from services.collection_service import get_random_doc
+from services.prompet_template import QUIZ_PROMPT_TEMPLATE
 
 logger = logging.getLogger(__name__)
 
 
-QUIZ_PROMPT_TEMPLATE = PromptTemplate(
-    input_variables=["context", "difficulty", "language"],
-    template="""
-                You are a knowledgeable quiz expert. Based on the context provided below, generate one multiple-choice question in {language}.
-
-                Context:
-                {context}
-
-                Instructions:
-                - Create one clear, well-structured question at a {difficulty} difficulty level.
-                - Provide 4 distinct answer options for the question, ensuring one option is correct and the others are plausible distractors.
-                - Avoid phrases such as "according to the text" or any similar references.
-            """
-        )
 
 async def create_question(collection_name : str, difficulty: str) -> QuestionSchema:
     try:
-        logger.info("Getting random document from collection...")
+        
+#         )logger.info("Getting random document from collection...")
         doc = await get_random_doc(collection_name)
         doc_content, language = doc.get("doc") , doc.get("lang")
         context = doc_content.page_content

@@ -66,7 +66,7 @@ async def retrive_paragraphe(collection_name: str, question: str) -> str:
             raise ValueError("Collection not found")
         retrived_doc = await collection_store.asimilarity_search(question, k=1)
         
-        return {"content": retrived_doc[0].page_content, "page_number": retrived_doc[0].page_label}
+        return {"content": retrived_doc[0].page_content, "page_number": retrived_doc[0].metadata.get("page_label")}
     except Exception as e:
         logger.error(f"An error occurred while retriving document: {str(e)}")
         raise e

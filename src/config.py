@@ -6,7 +6,6 @@ load_dotenv()
 
 class Settings(BaseSettings):
     HUGGINGFACE_API_KEY: str
-    HUGGINGFACEHUB_API_TOKEN: str
     COHERE_API_KEY: str
     CHAT_MODEL: str = "command-r-plus"
     EMBEDDING_MODEL: str = "sentence-transformers/paraphrase-multilingual-mpnet-base-v2"
