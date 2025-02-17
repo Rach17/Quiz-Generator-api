@@ -34,3 +34,9 @@ typing-extensions>=4.9.0  # Type hints support
 
 # for SSE (Server-Sent Events)
 starlette-sse>=2.2.1
+
+# for language detection
+langdetect>=1.0.9
+
+# naming collections
+python-slugify>=8.0.4

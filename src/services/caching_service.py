@@ -22,9 +22,9 @@ class CollectionCache:
         thread = threading.Thread(target=cleanup_loop, daemon=True)
         thread.start()
 
-    def add_collection(self, collection_name: str, collection, lifetime: float = settings.COLLECTION_LIFETIME):
+    def add_collection(self, collection_name: str, collection, size, language, lifetime: float = settings.COLLECTION_LIFETIME):
         expire_time = time.time() + lifetime if lifetime is not None else None
-        self.cache[collection_name] = {"collection": collection, "expire_time": expire_time}
+        self.cache[collection_name] = {"collection": collection, "size": size, "language" : language, "expire_time": expire_time}
 
     def get_collection(self, collection_name: str):
         item = self.cache.get(collection_name)

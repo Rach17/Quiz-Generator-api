@@ -6,11 +6,18 @@ from typing import  Dict
 from typing import List
 from langchain_core.documents import Document
 from datetime import datetime
-from services.collection_service import init_collection
+from services.collection_service import init_collection, generate_collection_name
+from langdetect import detect
 import logging
 
 logger = logging.getLogger(__name__)
 
+
+def detect_pdf_language(documents) -> str:
+    # Combine text from all pages for language detection
+    full_text = " ".join([doc.page_content for doc in documents])
+    detected_language = detect(full_text)
+    return detected_language
 
 async def load_pdf(file) -> List[Document]:
     temp_file = None
@@ -24,8 +31,12 @@ async def load_pdf(file) -> List[Document]:
         # PDF Loading
         loader = PyPDFLoader(temp_file)
         logging.info("Loading PDF document...")
-        document = loader.load()
-        return document
+        documents  = loader.load()
+        
+        detected_language = detect_pdf_language(documents)
+        logger.info(f"Detected language: {detected_language}")
+        
+        return documents, detected_language
     except Exception as e:
         logger.error(f"An error occurred while loading the PDF: {str(e)}")
         raise e
@@ -43,15 +54,15 @@ def split_pdf(document: List[Document], chunk_size: int = 500, chunk_overlap: in
 
 async def process_pdf(file) -> Dict:
     try:
-        document = await load_pdf(file)
-        docs = split_pdf(document)
-        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        collection_name = f"{file.filename}_{timestamp}"
+        documents, detected_language = await load_pdf(file)
+        docs = split_pdf(documents)
+        collection_name = generate_collection_name(file.filename)
 
-        await init_collection(collection_name, docs)
+        await init_collection(collection_name, docs, len(docs), detected_language)
         return {
             "collection_name": collection_name,
             "chunks_number": len(docs),
+            "language": detected_language
         }
     except Exception as e:
         raise e

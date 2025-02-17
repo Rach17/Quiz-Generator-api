@@ -31,8 +31,16 @@ class QuizSchema(BaseModel):
 class UploadPDFResponse(BaseModel):
     collection_name: str
     chunks_number: int
+    language: str
 
 class CheckCollectionResponse(BaseModel):
     collection_name: str
     chunks_number: int
     lifetime: str
+    language: str
+    
+class RetriveParagrapheResponse(BaseModel):
+    collection_name: str
+    question: str
+    content: str
+    page_number: int
