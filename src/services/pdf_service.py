@@ -57,8 +57,8 @@ async def process_pdf(file) -> Dict:
         documents, detected_language = await load_pdf(file)
         docs = split_pdf(documents)
         collection_name = generate_collection_name(file.filename)
-
-        await init_collection(collection_name, docs, len(docs), detected_language)
+        logger.info(f"Generated collection name: {collection_name}")    
+        await init_collection(docs, len(docs), detected_language, collection_name)
         return {
             "collection_name": collection_name,
             "chunks_number": len(docs),

@@ -1,5 +1,5 @@
 from langchain_core.documents import Document
-from utils.embeddings_utils import init_embiddings_model
+from utils.embeddings_utils import init_embeddings_model
 import random
 from langchain_chroma import Chroma
 from typing import List
@@ -13,11 +13,14 @@ import logging
 logger = logging.getLogger(__name__)
 cache = CollectionCache()
     
-async def init_collection(collection_name: str, documents: List[Document], size: int, language: str) -> None:
-    try :
-        collection = await Chroma.afrom_documents(documents=documents, embedding=init_embiddings_model())  
+async def init_collection(documents: List[Document], size: int, language: str = "fr", collection_name: str = "collection") -> None:
+    try:
+        logger.info(f"Initializing collection: {collection_name} with {len(documents)} docs")
+        embedding = init_embeddings_model()
+        logger.info(f"Embedding model initialized: {embedding}")
+        collection = await Chroma.afrom_documents(documents=documents, embedding=embedding)
         cache.add_collection(collection_name, collection, size, language)
-    except Exception as e: 
+    except Exception as e:
         logger.error(f"An error occurred while initializing collection: {str(e)}")
         raise e
     
@@ -43,7 +46,7 @@ def get_collection_info(collection_name: str):
             "lifetime": str(timedelta(seconds=(collection["expire_time"] - time.time())))  # Formate en HH:MM:SS
         }
     
-    from slugify import slugify  # install with: pip install python-slugify
+from slugify import slugify  # install with: pip install python-slugify
 import uuid
 from datetime import datetime
 
@@ -58,16 +61,16 @@ def generate_collection_name(filename: str) -> str:
     collection_name = f"{base_name}_{timestamp}_{unique_suffix}"
     return collection_name
 
-async def retrive_paragraphe(collection_name: str, question: str) -> str:
-    try:
-        collection_store = cache.get_collection(collection_name).get("collection")
-        if(collection_store is None):
-            logger.error("Collection not found")
-            raise ValueError("Collection not found")
-        retrived_doc = await collection_store.asimilarity_search(question, k=1)
+# async def retrive_paragraphe(collection_name: str, question: str) -> str:
+#     try:
+#         collection_store = cache.get_collection(collection_name).get("collection")
+#         if(collection_store is None):
+#             logger.error("Collection not found")
+#             raise ValueError("Collection not found")
+#         retrived_doc = await collection_store.asimilarity_search(question, k=1)
         
-        return {"content": retrived_doc[0].page_content, "page_number": retrived_doc[0].metadata.get("page_label")}
-    except Exception as e:
-        logger.error(f"An error occurred while retriving document: {str(e)}")
-        raise e
+#         return {"content": retrived_doc[0].page_content, "page_number": retrived_doc[0].metadata.get("page_label")}
+#     except Exception as e:
+#         logger.error(f"An error occurred while retriving document: {str(e)}")
+#         raise e
     
